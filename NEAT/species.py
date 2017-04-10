@@ -1,21 +1,22 @@
 from .genome import Genome, cross_genomes
+from .utils import *
+
 from operator import attrgetter
 import random
 import math
 
-_ADD_NODE_CHANCE = 0.05
-_ADD_CONNECTION_CHANCE = 0.3
-
-_PERCENT_NO_CROSS = 0.25
-_MUTATE_CHANCE = 0.8
 
 class Species:
+    spec_id = 0
+
     def __init__(self, gen):
         self.exemplar = gen.copy() # The exemplar needs to persist.
         self.genomes = [gen]
         self.adj_fitness = 0.0
         self.staleness = 0
         self.max_fitness = 0.0
+        self.ID = Species.spec_id
+        Species.spec_id += 1
 
     def calc_new_fitness(self):
         self.adj_fitness = 0.0
@@ -40,13 +41,14 @@ class Species:
 
     def make_children(self, num_children, added_connections, num_genomes):
         self.genomes = self.genomes[:math.ceil(len(self.genomes)*0.2)]
+        self.exemplar = random.choice(self.genomes)
         children = []
         for i in range(num_children):
             if i == 0 and len(self.genomes) >= 5:
                 children.append(self.genomes[0].copy())
             else:
                 gen1 = random.choice(self.genomes)
-                if random.random() < _PERCENT_NO_CROSS:
+                if random.random() < PERCENT_NO_CROSS:
                     children.append(gen1.copy())
                 else:
                     gen2 = random.choice(self.genomes)
@@ -59,12 +61,11 @@ class Species:
                 children_out.append(gen)
                 continue
             gen.init_network()            
-            if random.random() < _ADD_NODE_CHANCE:
+            if random.random() < ADD_NODE_CHANCE:
                 gen.add_node(added_connections)
-            if random.random() < max(_ADD_CONNECTION_CHANCE*.33, 
-                                     _ADD_CONNECTION_CHANCE*(len(self.genomes)/num_genomes)):
+            if random.random() < ADD_CONNECTION_CHANCE:
                 gen.add_connection(added_connections)
-            if random.random() < _MUTATE_CHANCE:
+            if random.random() < MUTATE_CHANCE:
                 gen.mutate()
             children_out.append(gen)
 

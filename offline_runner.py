@@ -8,7 +8,7 @@ import tqdm
 
 GENERATIONS = 150
 GENOMES = 200
-SAVE_DIR = 'results/run2'
+SAVE_DIR = 'results/run6'
 
 TRAIN_INPUTS = np.array([[0.0,0.0],
                          [1.0,0.0],
@@ -32,16 +32,19 @@ for generation in range(GENERATIONS):
             out = nl.get_output(inputs=inputs, genome=g)
             outputs.append(out)
             error += euclidean(TRAIN_OUTPUTS[i], out)
-        fitness = (4.0-error)*(4.0-error)
+        fitness = (4.0-error)**2
         nl.assign_fitness(fitness=fitness, genome=g)
         if fitness > best_fitness:
             best_fitness = fitness
-            print('New Best:', best_fitness)
+            print('New Best:', best_fitness, '\nGeneration:',generation)
+            nl.save_genome(SAVE_DIR, 'best', g)
 
     nl.end_generation()
+    #print(len(nl.species))
 
     if generation % 5 == 0:
-        nl.save_top_genome('gen{}'.format(generation), SAVE_DIR)
+        nl.save_top_genome(SAVE_DIR, 'gen{}'.format(generation))
+        #nl.save_species_exemplars(join(SAVE_DIR, 'gen_'+str(generation)))
         with open(pkl_file, 'wb') as f:
             pickle.dump(nl, f)
 

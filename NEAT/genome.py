@@ -1,14 +1,11 @@
 from .connection import Connection, get_next_connection_id
 from .node import Node
-from .utils import sigmoid
+from .utils import *
 
 import graphviz as gv
 import numpy as np
 import random
 
-_CONN_PERTURB_CHANCE = 0.9
-_REENABLE_CHANCE = 0.2
-_DISABLE_CHANCE = 0.1
 
 def cross_genomes(gen1, gen2):
     if gen2.fitness > gen1.fitness:
@@ -16,8 +13,9 @@ def cross_genomes(gen1, gen2):
 
     child = gen1.copy()
     for conn in gen1.connections:
-        if conn in gen2.connections and random.random() < 0.5:
-            child.connections[conn].weight = gen2.connections[conn].weight
+        if conn in gen2.connections:
+            if random.random() < 0.5:
+                child.connections[conn].weight = gen2.connections[conn].weight
 
     return child
 
@@ -47,19 +45,20 @@ class Genome:
 
     def mutate(self):
         for conn in (self.connections[x] for x in self.connections):
-            if random.random() < _CONN_PERTURB_CHANCE:
+            if random.random() < CONN_PERTURB_CHANCE:
                 conn.perturb()
             else:
                 conn.reset_weight()
 
-            if not conn.is_enabled and random.random() < _REENABLE_CHANCE:
+            if not conn.is_enabled and random.random() < REENABLE_CHANCE:
                 conn.is_enabled = True
-            elif conn.is_enabled and random.random() < _DISABLE_CHANCE:
+            elif conn.is_enabled and random.random() < DISABLE_CHANCE:
                 conn.is_enabled = False
 
     def add_node(self, added_connections):
         split_conn = self.connections[random.choice(list(self.connections.keys()))]
         new_node_num = max(self.nodes) + 1
+        was_enabled = split_conn.is_enabled
         split_conn.is_enabled = False
         new_incoming = Connection(from_node=split_conn.from_node,
                                   to_node=new_node_num,
@@ -76,11 +75,13 @@ class Genome:
             added_connections.append(new_incoming)
             
         self.connections[new_incoming.ID] = new_incoming
+        self.connections[new_incoming.ID].is_enabled = was_enabled
+
         new_outgoing = Connection(from_node=new_node_num,
                                   to_node=split_conn.to_node,
                                   ID=0,
                                   is_recurrent=split_conn.is_recurrent)
-
+        
         new_outgoing.weight = split_conn.weight
         for conn in added_connections:
             if conn == new_outgoing:
@@ -91,7 +92,7 @@ class Genome:
             added_connections.append(new_outgoing)
 
         self.connections[new_outgoing.ID] = new_outgoing
-        
+        self.connections[new_outgoing.ID].is_enabled = was_enabled        
 
     def add_connection(self, added_connections):
         from_node = random.randint(0, len(self.nodes)-1)
@@ -106,7 +107,8 @@ class Genome:
             if newCon == conn: # not going to bother trying another combination
                 return
 
-        if newCon.from_node in self.outputs and not self.allow_recurrent:
+        if not self.allow_recurrent and (newCon.from_node in self.outputs or
+                                         newCon.from_node == newCon.to_node):
             return
 
         for conn in added_connections:
@@ -149,6 +151,7 @@ class Genome:
         conns = (str(x) for x in self.connections.values())
         return fit + node + '\nConnections\n' + '\n'.join(conns)
 
+    # TODO: Remove ideal network creation
     def init_connections(self):
         con_id = 0
         for i in self.inputs:
@@ -156,6 +159,15 @@ class Genome:
                 newCon = Connection(i, j, con_id)
                 con_id += 1
                 self.connections[newCon.ID] = newCon
+
+                '''newCon = Connection(i,4, con_id)
+                con_id += 1
+                self.connections[newCon.ID] = newCon
+
+        for out in self.outputs:
+            newCon = Connection(4,out,con_id)
+            con_id += 1
+            self.connections[newCon.ID] = newCon'''
 
     def init_network(self):
         self.nodes = {}
@@ -166,8 +178,7 @@ class Genome:
             if conn.to_node not in self.nodes:
                 self.nodes[conn.to_node] = Node()
 
-            self.nodes[conn.to_node].incoming_connections.append(conn.ID)
-        
+            self.nodes[conn.to_node].incoming_connections.append(conn.ID)        
 
     def get_output(self, inputs):
         assert len(inputs) + 1 == self.num_inputs
@@ -206,9 +217,10 @@ class Genome:
         self.nodes[node_num].out = sigmoid(net)
         return self.nodes[node_num].out
 
-    def output_graph(self, outfile, outdir):
+    def output_graph(self, outdir, outfile):
         self.init_network()
         g1 = gv.Digraph(format='png')
+        
         g1.attr('node', shape='doublecircle')
         for in_node in self.inputs:
             g1.attr('node', color='green')
@@ -233,6 +245,7 @@ class Genome:
                     label='{:.4f}'.format(conn.weight))
             g1.attr('edge', color='black', arrowhead='normal', style='solid')
 
+        g1.body.append('label = "Fitness = {:.2f}"'.format(self.fitness))
         g1.render(filename=outfile,
                   directory=outdir,
                   cleanup=True)

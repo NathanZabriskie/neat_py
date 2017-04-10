@@ -1,8 +1,25 @@
 import math
 
-C1 = 1.5
-# C2 from the paper omitted
-C3 = 1.0
+# Hyper Parameters
+
+MAX_STALENESS = 20
+
+MUTATE_POWER = 3.0
+
+ADD_NODE_CHANCE = 0.03
+ADD_CONNECTION_CHANCE = 0.5
+
+PERCENT_NO_CROSS = 0.25
+MUTATE_CHANCE = 0.8
+
+CONN_PERTURB_CHANCE = 0.9
+REENABLE_CHANCE = 0.2
+DISABLE_CHANCE = 0.1
+
+DeltaDist = 3.0
+C1 = 1.0
+C2 = 1.0
+C3 = 0.3
 
 
 def sigmoid(net):
@@ -17,26 +34,46 @@ def get_genome_distance(gen1, gen2):
     if len(gen2.connections) > len(gen1.connections):
         big, small = gen2, gen1
 
-    if len(big.connections) < 20:
-        N = 1.0
-    else:
-        N = float(len(big.connections))
+    #if len(big.connections) < 20:
+    #    N = 1.0
+    #else:
+    N = float(len(big.connections))
     disjoint = _num_disjoint(big, small)
+    excess = _num_excess(big, small)
     diff = _avg_diff(big, small)
-    return (C1 * disjoint)/N + C3*diff
+    return (C1 * disjoint)/N + (C2 * excess)/N + C3*diff
 
 
 def _num_disjoint(gen1, gen2):
     disjoint = 0.0
+    gen1_max = max(list(gen1.connections.keys()))
+    gen2_max = max(list(gen2.connections.keys()))
+
     for conn in gen1.connections:
-        if conn not in gen2.connections:
+        if (conn < gen2_max and
+                conn not in gen2.connections):
             disjoint += 1.0
 
     for conn in gen2.connections:
-        if conn not in gen1.connections:
+        if (conn < gen1_max and 
+                conn not in gen1.connections):
             disjoint += 1.0
 
     return disjoint
+
+def _num_excess(gen1, gen2):
+    excess = 0.0
+    gen1_max = max(list(gen1.connections.keys()))
+    gen2_max = max(list(gen2.connections.keys()))
+
+    if gen2_max > gen1_max:
+        gen1, gen2 = gen2, gen1
+        gen1_max, gen2_max = gen2_max, gen1_max
+
+    for conn in gen1.connections:
+        if conn > gen2_max:
+            excess += 1.0
+    return excess
 
 
 def _avg_diff(gen1, gen2):

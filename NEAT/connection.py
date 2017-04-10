@@ -1,11 +1,12 @@
+from .utils import MUTATE_POWER
 import random
 
-_MUTATE_POWER = 4.0
 
 def get_next_connection_id():
     next_id = Connection.next_id
     Connection.next_id += 1
     return next_id
+
 
 class Connection:
     next_id = 0
@@ -29,7 +30,7 @@ class Connection:
         return cpy
 
     def perturb(self):
-        self.weight += random.normalvariate(0, _MUTATE_POWER)
+        self.weight += random.normalvariate(0, MUTATE_POWER)
 
     def reset_weight(self):
         self.weight = random.random() - 0.5

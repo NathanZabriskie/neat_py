@@ -7,10 +7,6 @@ from operator import attrgetter
 import math
 import random
 
-_DeltaDist = 4.0
-_MAX_STALENESS = 15
-
-
 class NeatLearner:
     def __init__(self,
                  num_inputs,
@@ -27,6 +23,8 @@ class NeatLearner:
 
         self.generations = 0
 
+        self.best_genome = None
+
         self._init_genomes()
         Connection.next_id = self.num_inputs + self.num_outputs - 1
 
@@ -41,6 +39,7 @@ class NeatLearner:
 
     def end_generation(self):
         self.generations += 1
+        self._update_best_genome()
         self._assign_species()
         self._remove_empty_species()
         self._remove_stale_species()
@@ -67,18 +66,32 @@ class NeatLearner:
 
         self.genomes = new_genomes
 
+    def _update_best_genome(self):
+        if self.best_genome is None:
+            self.best_genome = self.genomes[0]
+
+        for gen in self.genomes:
+            if gen.fitness > self.best_genome.fitness:
+                self.best_genome = gen
+
     def get_output(self, inputs, genome):
         return self.genomes[genome].get_output(inputs)
 
     def assign_fitness(self, fitness, genome):
         self.genomes[genome].fitness = fitness
 
-    def save_top_genome(self, outfile, outdir):
-        self.genomes = sorted(self.genomes,
-                              key=attrgetter('fitness'),
-                              reverse=True)
-        self.genomes[0].output_graph(outfile=outfile,
-                                     outdir=outdir)
+    def save_top_genome(self, outdir, outfile):
+        self.best_genome.output_graph(outdir, outfile)
+
+    def save_genome(self, outdir, outfile, genome):
+        self.genomes[genome].output_graph(outdir,
+                                          outfile)
+
+    def save_species_exemplars(self, outdir):
+        for spec in self.species:
+            f = 'species{}'.format(spec.ID)
+            spec.exemplar.output_graph(outdir,
+                                       f)
 
     def _assign_species(self):
         for spec in self.species:
@@ -86,7 +99,7 @@ class NeatLearner:
 
         for gen in self.genomes:
             for spec in self.species:
-                if get_genome_distance(gen, spec.exemplar) < _DeltaDist:
+                if get_genome_distance(gen, spec.exemplar) < DeltaDist:
                     spec.genomes.append(gen)
                     break
             else:
@@ -97,17 +110,19 @@ class NeatLearner:
         for spec in self.species:
             if len(spec.genomes) >= 1:
                 spec_out.append(spec)
-
         self.species = spec_out
 
     def _remove_stale_species(self):
+        if len(self.species) == 1:
+            return
         spec_out = []
         for spec in self.species:
             spec.update_staleness()
-            if spec.staleness < _MAX_STALENESS:
+            if spec.staleness < MAX_STALENESS:
                 spec_out.append(spec)
 
-        self.species = spec_out
+        if spec_out:
+            self.species = spec_out
 
     def _calc_total_fitness(self):
         total_fitness = 0.0
