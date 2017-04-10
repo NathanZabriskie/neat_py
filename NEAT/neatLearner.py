@@ -7,7 +7,7 @@ from operator import attrgetter
 import math
 import random
 
-_DeltaDist = 3.0
+_DeltaDist = 5.0
 _MAX_STALENESS = 15
 
 
@@ -15,10 +15,12 @@ class NeatLearner:
     def __init__(self,
                  num_inputs,
                  num_outputs,
-                 num_genomes):
+                 num_genomes,
+                 allow_recurrent):
         self.num_inputs = num_inputs + 1 # add in a bias node
         self.num_outputs = num_outputs
         self.num_genomes = num_genomes
+        self.allow_recurrent = allow_recurrent
 
         self.genomes = []
         self.species = []
@@ -31,7 +33,7 @@ class NeatLearner:
     def _init_genomes(self):
         print('Initializing ' + str(self.num_genomes) + ' genomes.')
         for i in range(self.num_genomes):
-            self.genomes.append(Genome(self.num_inputs, self.num_outputs))
+            self.genomes.append(Genome(self.num_inputs, self.num_outputs, self.allow_recurrent))
 
     def start_generation(self):
         for gen in self.genomes:
@@ -46,12 +48,16 @@ class NeatLearner:
         new_genomes = []
 
         added_connections = []
+        survived_species = []
         for spec in self.species:
             num_children = math.floor((spec.adj_fitness/total_fitness)
                                       * self.num_genomes)
-            new_genomes += spec.make_children(num_children,
+            if num_children != 0:
+                survived_species.append(spec)
+                new_genomes += spec.make_children(num_children,
                                               added_connections)
 
+        self.species = survived_species
         while len(new_genomes) < self.num_genomes:
             spec = random.choice(self.species)
             new_genomes += spec.make_children(1, added_connections)
