@@ -7,7 +7,7 @@ from operator import attrgetter
 import math
 import random
 
-_DeltaDist = 5.0
+_DeltaDist = 4.0
 _MAX_STALENESS = 15
 
 
@@ -55,12 +55,15 @@ class NeatLearner:
             if num_children != 0:
                 survived_species.append(spec)
                 new_genomes += spec.make_children(num_children,
-                                              added_connections)
+                                                  added_connections,
+                                                  self.num_genomes)
 
         self.species = survived_species
         while len(new_genomes) < self.num_genomes:
             spec = random.choice(self.species)
-            new_genomes += spec.make_children(1, added_connections)
+            new_genomes += spec.make_children(1, 
+                                              added_connections,
+                                              self.num_genomes)
 
         self.genomes = new_genomes
 

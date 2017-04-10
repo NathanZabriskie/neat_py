@@ -1,6 +1,6 @@
 import random
 
-_MUTATE_POWER = 1.0
+_MUTATE_POWER = 4.0
 
 def get_next_connection_id():
     next_id = Connection.next_id

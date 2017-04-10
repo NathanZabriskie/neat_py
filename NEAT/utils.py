@@ -1,8 +1,8 @@
 import math
 
-_C1 = 1.0
+C1 = 1.5
 # C2 from the paper omitted
-_C3 = 1.0
+C3 = 1.0
 
 
 def sigmoid(net):
@@ -23,7 +23,7 @@ def get_genome_distance(gen1, gen2):
         N = float(len(big.connections))
     disjoint = _num_disjoint(big, small)
     diff = _avg_diff(big, small)
-    return (_C1 * disjoint)/N + _C3*diff
+    return (C1 * disjoint)/N + C3*diff
 
 
 def _num_disjoint(gen1, gen2):

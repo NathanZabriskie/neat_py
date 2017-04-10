@@ -3,8 +3,8 @@ from operator import attrgetter
 import random
 import math
 
-_ADD_NODE_CHANCE = 0.03
-_ADD_CONNECTION_CHANCE = 0.05
+_ADD_NODE_CHANCE = 0.05
+_ADD_CONNECTION_CHANCE = 0.3
 
 _PERCENT_NO_CROSS = 0.25
 _MUTATE_CHANCE = 0.8
@@ -38,8 +38,8 @@ class Species:
         else:
             self.staleness += 1
 
-    def make_children(self, num_children, added_connections):
-        self.genomes = self.genomes[:math.ceil(len(self.genomes)*0.3)]
+    def make_children(self, num_children, added_connections, num_genomes):
+        self.genomes = self.genomes[:math.ceil(len(self.genomes)*0.2)]
         children = []
         for i in range(num_children):
             if i == 0 and len(self.genomes) >= 5:
@@ -61,7 +61,8 @@ class Species:
             gen.init_network()            
             if random.random() < _ADD_NODE_CHANCE:
                 gen.add_node(added_connections)
-            if random.random() < _ADD_CONNECTION_CHANCE:
+            if random.random() < max(_ADD_CONNECTION_CHANCE*.33, 
+                                     _ADD_CONNECTION_CHANCE*(len(self.genomes)/num_genomes)):
                 gen.add_connection(added_connections)
             if random.random() < _MUTATE_CHANCE:
                 gen.mutate()

@@ -8,7 +8,7 @@ import random
 
 _CONN_PERTURB_CHANCE = 0.9
 _REENABLE_CHANCE = 0.2
-_DISABLE_CHANCE = 0.0
+_DISABLE_CHANCE = 0.1
 
 def cross_genomes(gen1, gen2):
     if gen2.fitness > gen1.fitness:
@@ -29,7 +29,6 @@ class Genome:
         self.connections = {}
         self.nodes = {}
         self.fitness = 0.0
-        self.adjusted_fitness = 0.0
 
         self.outputs = set([i+self.num_inputs for i in range(num_outputs)])
         self.inputs = set([i for i in range(num_inputs)])
@@ -38,7 +37,6 @@ class Genome:
     def copy(self):
         cpy = Genome(self.num_inputs, self.num_outputs, self.allow_recurrent)
         cpy.fitness = self.fitness
-        cpy.adjusted_fitness = self.adjusted_fitness
         cpy.connections = {}
 
         for conn_id in self.connections:

@@ -37,8 +37,6 @@ for generation in range(GENERATIONS):
         if fitness > best_fitness:
             best_fitness = fitness
             print('New Best:', best_fitness)
-            if fitness > 8.0:
-                print('want to cry')
 
     nl.end_generation()
 
