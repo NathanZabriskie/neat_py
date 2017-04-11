@@ -57,6 +57,9 @@ class NeatUDPClient:
         elif command == 'save_species':
             self.NL.save_species_exemplars(**data['args'])
             return OK
+        elif command == 'set_best':
+            self.set_best(**data['args'])
+            return OK
 
     def init(self, args):
         self.NL = NeatLearner(**args)
@@ -84,6 +87,9 @@ class NeatUDPClient:
     def load_backup(self, outdir, outfile):
         with open(join(outdir, outfile), 'rb') as f:
             self.NL = pickle.load(f)
+
+    def set_best(genome):
+        self.NL.best_genome = self.NL.genomes[genome]
 
 if __name__ == '__main__':
     client = NeatUDPClient()

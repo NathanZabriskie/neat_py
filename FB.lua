@@ -19,6 +19,9 @@ local DEAD = 177
 local NUM_GENERATIONS = 100
 local NUM_GENOMES = 150
 
+local CLEAR_BONUS = 100
+local FLAP_PENALTY = 5
+
 local function read_mem()
 	local y, h
 	y = memory.readbyte(yRAM)
@@ -141,24 +144,22 @@ for generation=0, NUM_GENERATIONS-1 do
 		while not dead do
 			mem = read_mem()
 			cleared_pipes = mem['cleared']
-			fitness = survived_frames + cleared_pipes * 100
-			--if mem['y'] < 20 then
-			--	fitness = fitness / 4
-			--end
-			draw_gui(mem['h'], mem['y'], generation, genome, fitness)
+			fitness = fitness + 1 + cleared_pipes * CLEAR_BONUS
 
 			if mem['y'] == DEAD then
 				savestate.load(SAVE_FILE)
 				dead = true
 			else
 				out = get_output(genome, {mem['y']/DEAD, mem['h']/DEAD})
-
 				out = out[1]
 				local controller = joypad.get(1)
 				controller['A'] = false
 				if mem['s'] ~= 255 and out > 0.5 then
 					controller['A'] = true
+					fitness = fitness - FLAP_PENALTY
 				end
+				fitness = math.max(0, fitness)
+				draw_gui(mem['h'], mem['y'], generation, genome, fitness)
 				joypad.set(controller, 1)
 				emu.frameadvance()
 				survived_frames = survived_frames + 1
@@ -169,9 +170,8 @@ for generation=0, NUM_GENERATIONS-1 do
 	end
 	end_gen()
 	save_best(SAVE_DIR,'gen_' .. tostring(generation))
-	if generation % 5 == 0 then
-		save_species(SAVE_DIR .. '/' .. tostring(generation))
-	end
+	save_species(SAVE_DIR .. '/' .. tostring(generation))
+	save_backup(SAVE_DIR, 'gen_' .. tostring(generation) .. '.pkl')
 end
 
 while true do
