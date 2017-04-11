@@ -56,11 +56,13 @@ class NeatLearner:
                 new_genomes += spec.make_children(num_children,
                                                   added_connections,
                                                   self.num_genomes)
+            else:
+                print('No kids :(')
 
         self.species = survived_species
         while len(new_genomes) < self.num_genomes:
             spec = random.choice(self.species)
-            new_genomes += spec.make_children(1, 
+            new_genomes += spec.make_children(1,
                                               added_connections,
                                               self.num_genomes)
 
@@ -77,6 +79,9 @@ class NeatLearner:
     def get_output(self, inputs, genome):
         return self.genomes[genome].get_output(inputs)
 
+    def get_best_output(self, inputs):
+        return self.best_genome.get_output(inputs)
+
     def assign_fitness(self, fitness, genome):
         self.genomes[genome].fitness = fitness
 
@@ -91,7 +96,8 @@ class NeatLearner:
         for spec in self.species:
             f = 'species{}'.format(spec.ID)
             spec.exemplar.output_graph(outdir,
-                                       f)
+                                       f,
+                                       len(spec.genomes))
 
     def _assign_species(self):
         for spec in self.species:

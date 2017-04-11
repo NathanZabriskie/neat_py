@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{a2739cb2-5b03-4413-a076-41494e35bb47}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>offline_runner.py</StartupFile>
+    <StartupFile>remote_runner.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -19,6 +19,7 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="arff_loader.py" />
     <Compile Include="NEAT\connection.py" />
     <Compile Include="NEAT\genome.py" />
     <Compile Include="NEAT\neatLearner.py" />
@@ -28,7 +29,7 @@
     <Compile Include="NEAT\__init__.py" />
     <Compile Include="offline_runner.py" />
     <Compile Include="SpeciesTest.py" />
-    <Compile Include="test.py" />
+    <Compile Include="remote_runner.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="NEAT" />

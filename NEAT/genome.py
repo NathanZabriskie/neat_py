@@ -73,7 +73,7 @@ class Genome:
         else:
             new_incoming.ID = get_next_connection_id()
             added_connections.append(new_incoming)
-            
+
         self.connections[new_incoming.ID] = new_incoming
         self.connections[new_incoming.ID].is_enabled = was_enabled
 
@@ -81,7 +81,7 @@ class Genome:
                                   to_node=split_conn.to_node,
                                   ID=0,
                                   is_recurrent=split_conn.is_recurrent)
-        
+
         new_outgoing.weight = split_conn.weight
         for conn in added_connections:
             if conn == new_outgoing:
@@ -92,7 +92,7 @@ class Genome:
             added_connections.append(new_outgoing)
 
         self.connections[new_outgoing.ID] = new_outgoing
-        self.connections[new_outgoing.ID].is_enabled = was_enabled        
+        self.connections[new_outgoing.ID].is_enabled = was_enabled
 
     def add_connection(self, added_connections):
         from_node = random.randint(0, len(self.nodes)-1)
@@ -120,7 +120,7 @@ class Genome:
             added_connections.append(newCon)
 
         self.connections[newCon.ID] = newCon
-        self.init_network() # rebuild network to include new connection        
+        self.init_network() # rebuild network to include new connection
         self.check_recurrent()
 
     def check_recurrent(self):
@@ -178,7 +178,7 @@ class Genome:
             if conn.to_node not in self.nodes:
                 self.nodes[conn.to_node] = Node()
 
-            self.nodes[conn.to_node].incoming_connections.append(conn.ID)        
+            self.nodes[conn.to_node].incoming_connections.append(conn.ID)
 
     def get_output(self, inputs):
         assert len(inputs) + 1 == self.num_inputs
@@ -217,10 +217,10 @@ class Genome:
         self.nodes[node_num].out = sigmoid(net)
         return self.nodes[node_num].out
 
-    def output_graph(self, outdir, outfile):
+    def output_graph(self, outdir, outfile, numInSpecies=None):
         self.init_network()
         g1 = gv.Digraph(format='png')
-        
+
         g1.attr('node', shape='doublecircle')
         for in_node in self.inputs:
             g1.attr('node', color='green')
@@ -245,7 +245,13 @@ class Genome:
                     label='{:.4f}'.format(conn.weight))
             g1.attr('edge', color='black', arrowhead='normal', style='solid')
 
-        g1.body.append('label = "Fitness = {:.2f}"'.format(self.fitness))
+        if numInSpecies:
+            label = ('label = "Fitness = {:.2f}, '
+                     'Species Size = {}"').format(self.fitness,
+                                                  numInSpecies)
+        else:
+            label = 'label = "Fitness = {:.2f}"'.format(self.fitness)
+        g1.body.append(label)
         g1.render(filename=outfile,
                   directory=outdir,
                   cleanup=True)

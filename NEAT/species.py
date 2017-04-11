@@ -40,7 +40,8 @@ class Species:
             self.staleness += 1
 
     def make_children(self, num_children, added_connections, num_genomes):
-        self.genomes = self.genomes[:math.ceil(len(self.genomes)*0.2)]
+        cutoff = max(3, math.ceil(len(self.genomes)*0.2))
+        self.genomes = self.genomes[:cutoff]
         self.exemplar = random.choice(self.genomes)
         children = []
         for i in range(num_children):
@@ -60,7 +61,7 @@ class Species:
             if i == 0 and len(self.genomes) > 5:
                 children_out.append(gen)
                 continue
-            gen.init_network()            
+            gen.init_network()
             if random.random() < ADD_NODE_CHANCE:
                 gen.add_node(added_connections)
             if random.random() < ADD_CONNECTION_CHANCE:
