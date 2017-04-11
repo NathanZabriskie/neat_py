@@ -1,8 +1,10 @@
 from NEAT.neatLearner import NeatLearner
 
+import pickle
 import socket
 import signal
 import json
+from os.path import join
 
 OK = {'status':'OK'}
 
@@ -20,14 +22,12 @@ class NeatUDPClient:
         while True:
             try:
                 data, source = self.s.recvfrom(2048)
-                print(source)
             except socket.timeout:
                 continue
             data = json.loads(data)
             res = self.process_msg(data)
             json_obj = json.dumps(res)
             self.s.sendto(json_obj.encode('utf-8'), source)
-            print(json.dumps(res))
 
     def process_msg(self, data):
         command = data['command']
@@ -38,12 +38,25 @@ class NeatUDPClient:
             self.NL.start_generation()
             return OK
         elif command == 'end_gen':
+            print('Ending generation')
             self.NL.end_generation()
             return OK
         elif command == 'get_output':
            return self.get_output(data['args'])
         elif command == 'save_best':
             return self.save_best(data['args'])
+        elif command == 'assign_fitness':
+            self.NL.assign_fitness(**data['args'])
+            return OK
+        elif command == 'save_backup':
+            self.backup(**data['args'])
+            return OK
+        elif command == 'load_backup':
+            self.backup(**data['args'])
+            return OK
+        elif command == 'save_species':
+            self.NL.save_species_exemplars(**data['args'])
+            return OK
 
     def init(self, args):
         self.NL = NeatLearner(**args)
@@ -56,12 +69,21 @@ class NeatUDPClient:
         return res
 
     def save_best(self, args):
+        print('Saving best')
         self.NL.save_top_genome(**args)
         return OK
 
     def quit(self):
         print('Closing socket')
         self.s.close()
+
+    def backup(self, outdir, outfile):
+        with open(join(outdir, outfile), 'wb') as f:
+            pickle.dump(self.NL, f)
+
+    def load_backup(self, outdir, outfile):
+        with open(join(outdir, outfile), 'rb') as f:
+            self.NL = pickle.load(f)
 
 if __name__ == '__main__':
     client = NeatUDPClient()
