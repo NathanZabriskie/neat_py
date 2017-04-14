@@ -9,19 +9,22 @@ import math
 class Species:
     spec_id = 0
 
-    def __init__(self, gen):
+    def __init__(self, gen, generation):
         self.exemplar = gen.copy() # The exemplar needs to persist.
         self.genomes = [gen]
         self.adj_fitness = 0.0
         self.staleness = 0
         self.max_fitness = 0.0
         self.ID = Species.spec_id
+        self.birth = generation
+        self.genomes_history = []
         Species.spec_id += 1
 
     def calc_new_fitness(self):
         self.adj_fitness = 0.0
         num_genomes = len(self.genomes)
-
+        self.genomes_history.append(num_genomes)
+        
         for gen in self.genomes:
             self.adj_fitness += gen.fitness
             gen.adjusted_fitness = gen.fitness / num_genomes

@@ -97,8 +97,6 @@ class Genome:
     def add_connection(self, added_connections):
         from_node = random.randint(0, len(self.nodes)-1)
         to_node = random.randint(0, len(self.nodes)-1)
-        while to_node in self.inputs:
-            to_node = random.randint(0, len(self.nodes)-1)
 
         newCon = Connection(from_node=from_node,
                             to_node=to_node,
@@ -108,7 +106,8 @@ class Genome:
                 return
 
         if not self.allow_recurrent and (newCon.from_node in self.outputs or
-                                         newCon.from_node == newCon.to_node):
+                                         newCon.from_node == newCon.to_node or
+                                         newCon.to_node in self.inputs):
             return
 
         for conn in added_connections:

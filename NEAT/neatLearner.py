@@ -3,6 +3,7 @@ from .genome import Genome
 from .species import Species
 from .utils import *
 
+from collections import defaultdict
 from operator import attrgetter
 import math
 import random
@@ -19,7 +20,9 @@ class NeatLearner:
         self.allow_recurrent = allow_recurrent
 
         self.genomes = []
+
         self.species = []
+        self.graveyard = []
 
         self.generations = 0
 
@@ -52,7 +55,7 @@ class NeatLearner:
         self.generations += 1
         self.adjust_species()
         self._update_best_genome()
-        self._assign_species()
+        self._assign_species(self.generations)
         self._remove_empty_species()
         self._remove_stale_species()
         total_fitness = self._calc_total_fitness()
@@ -109,9 +112,9 @@ class NeatLearner:
             f = 'species{}'.format(spec.ID)
             spec.exemplar.output_graph(outdir,
                                        f,
-                                       len(spec.genomes))
+                                       spec.genomes_history[-1])
 
-    def _assign_species(self):
+    def _assign_species(self, generation):
         for spec in self.species:
             spec.genomes = []
 
@@ -121,13 +124,15 @@ class NeatLearner:
                     spec.genomes.append(gen)
                     break
             else:
-                self.species.append(Species(gen))
+                self.species.append(Species(gen, generation))
 
     def _remove_empty_species(self):
         spec_out = []
         for spec in self.species:
             if len(spec.genomes) >= 1:
                 spec_out.append(spec)
+            else:
+                self.graveyard.append(spec)
         self.species = spec_out
 
     def _remove_stale_species(self):
@@ -138,6 +143,8 @@ class NeatLearner:
             spec.update_staleness()
             if spec.staleness < MAX_STALENESS:
                 spec_out.append(spec)
+            else:
+                self.graveyard.append(spec)
 
         if spec_out:
             self.species = spec_out
