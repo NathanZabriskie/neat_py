@@ -9,14 +9,15 @@ import pickle
 import shutil
 import time
 
-env = gym.make('CartPole-v0')
+env = gym.make('CartPole-v1')
 SOLUTION_ITERATIONS = 100
-SOLUTION_FOUND = 195.0
+SOLUTION_FOUND = 475.0
 
-NUM_GENOMES = 500
+NUM_GENOMES = 1000
 NO_VELOCITY = True
+RENDER = False
 
-SAVE_DIR = 'results/polenovel'
+SAVE_DIR = 'results/polenovel_long_no_v2'
 pkl_file = join(SAVE_DIR, 'backup.pkl')
 
 def check_solution(genome):
@@ -26,19 +27,21 @@ def check_solution(genome):
         observation = env.reset()
         done = False
         while not done:
-            env.render()
+            if RENDER:
+                env.render()
             out = nl.get_output(get_input(observation), genome)
             action = 0 if out < 0.5 else 1
             observation, reward, done, info = env.step(action)
             fitness += reward
 
-    print('Avg fitness ', str(fitness / SOLUTION_ITERATIONS))
-    return fitness / SOLUTION_ITERATIONS > SOLUTION_FOUND
+    avg_fitness = fitness / SOLUTION_ITERATIONS
+    print('Avg fitness ', str(avg_fitness))
+    return avg_fitness > SOLUTION_FOUND, avg_fitness
 
 def save_and_exit(generations, neatLearner, best_fitness_hist, seconds):
     with open(join(SAVE_DIR, 'summary.txt'), 'w') as f:
         f.write('Trained in {} generations\n'.format(generations))
-        f.write('Trained in {:.4f}'.format(seconds))
+        f.write('Trained in {:.4f} seconds\n'.format(seconds))
         f.write('Num Genomes: {}\n'.format(NUM_GENOMES))
         f.write('Include Velocity: {}\n'.format(not NO_VELOCITY))
         f.write(print_hyperparameters())
@@ -86,21 +89,25 @@ if __name__ == '__main__':
             observation = env.reset()
             done = False
             while not done:
-                env.render()
+                if RENDER:
+                    env.render()
                 out = nl.get_output(get_input(observation), genome)
                 action = 0 if out < 0.5 else 1
                 observation, reward, done, info = env.step(action)
                 fitness += reward
-                if fitness > 199 and check_solution(genome):
-                    print('Found a winner!')
-                    nl.best_genome = nl.genomes[genome]
-                    nl.save_genome(SAVE_DIR, 'best', genome)
-                    nl.assign_fitness(fitness, genome)
-                    best_fitness_hist.append(fitness)
-                    save_and_exit(generation,
-                                  nl,
-                                  best_fitness_hist,
-                                  time.time() - start_time)
+                if fitness > 499:
+                    winner, avg = check_solution(genome)
+                    fitness += avg * 2
+                    if winner:
+                        print('Found a winner!')
+                        nl.best_genome = nl.genomes[genome]
+                        nl.assign_fitness(fitness, genome)
+                        nl.save_top_genome(SAVE_DIR, 'best')
+                        best_fitness_hist.append(fitness)
+                        save_and_exit(generation,
+                                      nl,
+                                      best_fitness_hist,
+                                      time.time() - start_time)
 
             nl.assign_fitness(fitness, genome)
 
@@ -114,7 +121,9 @@ if __name__ == '__main__':
             nl.save_top_genome(SAVE_DIR, 'best')
 
         best_fitness_hist.append(best_fitness)
-        nl.save_top_genome(SAVE_DIR, 'gen{}'.format(generation))
-        nl.save_species_exemplars(join(SAVE_DIR, 'gen_'+str(generation)))
-        with open(pkl_file, 'wb') as f:
-            pickle.dump(nl, f)
+
+        if generation % 30 == 0:
+            nl.save_top_genome(SAVE_DIR, 'gen{}'.format(generation))
+            nl.save_species_exemplars(join(SAVE_DIR, 'gen_'+str(generation)))
+            with open(pkl_file, 'wb') as f:
+                pickle.dump(nl, f)

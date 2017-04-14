@@ -101,6 +101,9 @@ class Genome:
         newCon = Connection(from_node=from_node,
                             to_node=to_node,
                             ID=0)
+
+        if newCon.to_node in self.inputs:
+            return
         for conn in (self.connections[x] for x in self.connections):
             if newCon == conn: # not going to bother trying another combination
                 return
@@ -128,6 +131,9 @@ class Genome:
         for conn in self.connections:
             self.connections[conn].is_recurrent = False
         for node_id in self.outputs:
+            self.mark_cycles(node_id, visited, stk)
+
+        for node_id in self.nodes:
             self.mark_cycles(node_id, visited, stk)
 
     def mark_cycles(self, node_id, visited, stk):
