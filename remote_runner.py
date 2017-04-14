@@ -1,4 +1,5 @@
 from NEAT.neatLearner import NeatLearner
+from NEAT.utils import print_hyperparameters
 
 import pickle
 import socket
@@ -40,6 +41,8 @@ class NeatUDPClient:
         elif command == 'end_gen':
             print('Ending generation')
             self.NL.end_generation()
+            print('Best Fitness: {}'.format(self.NL.best_genome.fitness))
+            print('Num Species: {}\n'.format(len(self.NL.species)))
             return OK
         elif command == 'get_output':
            return self.get_output(data['args'])
@@ -84,11 +87,15 @@ class NeatUDPClient:
         with open(join(outdir, outfile), 'wb') as f:
             pickle.dump(self.NL, f)
 
+        with open(join(outdir, 'summary.txt'), 'w') as f:
+            f.write(print_hyperparameters())
+            f.write('\n')
+
     def load_backup(self, outdir, outfile):
         with open(join(outdir, outfile), 'rb') as f:
             self.NL = pickle.load(f)
 
-    def set_best(genome):
+    def set_best(self, genome):
         self.NL.best_genome = self.NL.genomes[genome]
 
 if __name__ == '__main__':

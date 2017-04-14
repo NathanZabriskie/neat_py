@@ -10,7 +10,7 @@ local w = {0, 0}
 local s, p
 
 local SAVE_FILE = 'FB.State'
-local SAVE_DIR = 'results/flappy'
+local SAVE_DIR = 'results/flappy_penalty'
 local other_port = 8080
 local my_port = 8088
 local ip = '127.0.0.1'
@@ -18,7 +18,7 @@ local ip = '127.0.0.1'
 local DEAD = 177
 local NUM_GENERATIONS = 100
 local NUM_GENOMES = 150
-local MAX_FITNESS = 10000
+local MAX_FITNESS = 5000000
 
 local CLEAR_BONUS = 100
 local FLAP_PENALTY = 5
@@ -54,7 +54,7 @@ end
 
 
 local function draw_gui(h, y, cur_generation, cur_genome, survived_frames)
-	gui.text(10,9, "Pipe height: " .. h)
+	gui.text(10,9, "Pipe Height: " .. h)
 	gui.text(10,29,"Bird Height: " .. y)
 	gui.text(190,9,"Generation: " .. cur_generation)
 	gui.text(190,29, "Genome: " .. cur_genome)
@@ -138,6 +138,14 @@ local function set_best(best_genome)
 	send_message(cmd)
 end
 
+
+local function save_backup(directory, file)
+	local cmd = {command='save_backup',
+				 args={outdir=directory,
+			 		   outfile=file}}
+	send_message(cmd)
+end
+
 -- Program starts here
 init_nl()
 savestate.load(SAVE_FILE)
@@ -149,7 +157,7 @@ for generation=0, NUM_GENERATIONS-1 do
 
 	start_gen()
 	for genome=0, NUM_GENOMES-1 do
-		if foundBest then
+		if found_best then
 			break
 		end
 
@@ -185,6 +193,9 @@ for generation=0, NUM_GENERATIONS-1 do
 					set_best(genome)
 					save_best(SAVE_DIR, 'FINAL_BEST_GEN_' .. tostring(generation))
 					save_backup(SAVE_DIR, 'FINAL_BEST.pkl')
+					save_species(SAVE_DIR .. '/' .. tostring(generation))
+					break
+				end
 			end
 		end
 
