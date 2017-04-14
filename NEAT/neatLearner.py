@@ -37,8 +37,20 @@ class NeatLearner:
         for gen in self.genomes:
             gen.init_network()
 
+    def adjust_species(self):
+        if self.generations <= 1:
+            return
+        global DeltaDist
+        if len(self.species) < SPECIES_TARGET:
+            DeltaDist -= DELTA_ADJUSTER
+        elif len(self.species) > SPECIES_TARGET:
+            DeltaDist += DELTA_ADJUSTER
+
+        DeltaDist = max(DeltaDist, MIN_DISTANCE)
+
     def end_generation(self):
         self.generations += 1
+        self.adjust_species()
         self._update_best_genome()
         self._assign_species()
         self._remove_empty_species()

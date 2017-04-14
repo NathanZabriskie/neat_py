@@ -15,7 +15,7 @@ def load_arff(arff_file, one_hot=True, normalize=True):
     data = data[:,:-1]
     if normalize:
         data = (data - data.min(axis=0)) / data.ptp(axis=0)
-
+        data = np.nan_to_num(data)
     if one_hot:
         label_binarizer = sklearn.preprocessing.LabelBinarizer()
         label_binarizer.fit(range(max(labels) + 1))

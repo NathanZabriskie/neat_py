@@ -18,6 +18,7 @@ local ip = '127.0.0.1'
 local DEAD = 177
 local NUM_GENERATIONS = 100
 local NUM_GENOMES = 150
+local MAX_FITNESS = 10000
 
 local CLEAR_BONUS = 100
 local FLAP_PENALTY = 5
@@ -130,17 +131,33 @@ local function save_species(save_dir)
 	send_message(cmd)
 end
 
+
+local function set_best(best_genome)
+	local cmd = {command='set_best',
+			     args={genome=best_genome}}
+	send_message(cmd)
+end
+
 -- Program starts here
 init_nl()
 savestate.load(SAVE_FILE)
-
+local found_best = false
 for generation=0, NUM_GENERATIONS-1 do
+	if found_best then
+		break
+	end
+
 	start_gen()
 	for genome=0, NUM_GENOMES-1 do
+		if foundBest then
+			break
+		end
+
 		local survived_frames = 0
 		local cleared_pipes = 0
 		local dead = false
 		local fitness = 0.0
+
 		while not dead do
 			mem = read_mem()
 			cleared_pipes = mem['cleared']
@@ -163,6 +180,11 @@ for generation=0, NUM_GENERATIONS-1 do
 				joypad.set(controller, 1)
 				emu.frameadvance()
 				survived_frames = survived_frames + 1
+				if fitness > MAX_FITNESS then
+					found_best = true
+					set_best(genome)
+					save_best(SAVE_DIR, 'FINAL_BEST_GEN_' .. tostring(generation))
+					save_backup(SAVE_DIR, 'FINAL_BEST.pkl')
 			end
 		end
 
@@ -172,13 +194,4 @@ for generation=0, NUM_GENERATIONS-1 do
 	save_best(SAVE_DIR,'gen_' .. tostring(generation))
 	save_species(SAVE_DIR .. '/' .. tostring(generation))
 	save_backup(SAVE_DIR, 'gen_' .. tostring(generation) .. '.pkl')
-end
-
-while true do
-	mem = read_mem()
-	draw_gui(mem['h'], mem['y'], 0, 0)
-	if mem['y'] == DEAD then
-		savestate.load(SAVE_FILE)
-	end
-	emu.frameadvance()
 end

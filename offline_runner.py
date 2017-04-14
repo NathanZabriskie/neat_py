@@ -13,8 +13,9 @@ import tqdm
 
 GENERATIONS = 200
 GENOMES = 200
-SAVE_DIR = 'results/iris_LONG2'
-DATASET = 'data/iris.arff'
+
+SAVE_DIR = 'results/ionosphere_long'
+DATASET = 'data/ionosphere.arff'
 
 def XOR():
     inputs = np.array([[0.0,0.0],
@@ -71,7 +72,6 @@ if exists(SAVE_DIR):
 inputs, labels = load_arff(DATASET, normalize=True)
 inputs, labels = unison_shuffle(inputs, labels)
 train_data, train_labels, test_data, test_labels = split_sets(inputs,labels)
-
 nl = NeatLearner(num_inputs=train_data.shape[1],
                  num_outputs=train_labels.shape[1],
                  num_genomes=GENOMES,
@@ -81,8 +81,9 @@ pkl_file = join(SAVE_DIR, 'backup.pkl')
 best_fitness = -9999999.0
 accuracy_hist = []
 num_species = []
+max_fitness = train_labels.shape[0] * train_labels.shape[1]
+print(max_fitness)
 for generation in range(GENERATIONS):
-
     nl.start_generation()
     print('\nStarting Generation:', nl.generations)
     for g in range(GENOMES):
@@ -90,7 +91,7 @@ for generation in range(GENERATIONS):
         for i, inputs in enumerate(train_data):
             out = nl.get_output(inputs=inputs, genome=g)
             error += euclidean(train_labels[i], out)
-        fitness = -error/train_data.shape[0]
+        fitness = max_fitness - error
         nl.assign_fitness(fitness=fitness, genome=g)
 
 

@@ -3,6 +3,8 @@ import numpy as np
 
 
 # Hyper Parameters
+
+'''
 MAX_STALENESS = 20
 
 MUTATE_POWER = 2.0
@@ -21,6 +23,29 @@ DeltaDist = 3.0
 C1 = 1.0
 C2 = 1.0
 C3 = 0.4
+
+'''
+MAX_STALENESS = 20
+
+MUTATE_POWER = 2.0
+
+ADD_NODE_CHANCE = 0.05
+ADD_CONNECTION_CHANCE = 0.1
+
+PERCENT_NO_CROSS = 0.4
+MUTATE_CHANCE = 0.8
+
+CONN_PERTURB_CHANCE = 0.9
+REENABLE_CHANCE = 0.2
+DISABLE_CHANCE = 0.1
+
+DeltaDist = 6.0
+SPECIES_TARGET = 12
+DELTA_ADJUSTER = 0.3
+MIN_DISTANCE = 0.3
+C1 = 1.5
+C2 = 1.5
+C3 = 0.1
 
 
 def unison_shuffle(a, b):
