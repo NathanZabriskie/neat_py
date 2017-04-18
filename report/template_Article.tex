@@ -29,8 +29,8 @@ conventions and overly penalizing new, larger topologies.
 
 In \textit{Evolving Neural Networks through Augmenting Topologies} \cite{neat_paper} Stanley and 
 Miikkulainen present their algorithm NeuroEvolution of Augmenting Topologies (NEAT) which addresses some of
-these problems. This paper examines the contributions of NEAT and evaluates its performance on a number
-of tasks.
+these problems. This paper examines the contributions of NEAT to genetic learning and evaluates its
+performance on a number of tasks.
 
 \section{NEAT Overview} \label{sec:overview}
 As mentioned above, early TWEANN models often suffered from information loss during the crossover phase
@@ -39,7 +39,7 @@ When two genomes contain hidden nodes that encode the same information, if their
 in different orders their offspring will invariably lose the capabilities of at least one of the 
 hidden nodes as shown in figure \ref{fig:crossover_loss}. 
 
-NEAT addresses this problem by assigning each connection within the network an innovation number based on
+NEAT addresses this problem by assigning each connection within the network an innovation number or ID based on
 when the connection first appears. Each time a connection is added during the offspring creation phase at the end of a generation it is compared with other connections that have appeared in the same generation. 
 If a matching connection is found then the connection is assigned the same innovation number as the earlier
 connection, otherwise it is given a new, unique number. In future generations when performing crossover,
@@ -58,14 +58,19 @@ developments. In order to encourage the development of simple networks many TWEA
 term to fitness calculations based on the number of nodes in a network. Although this will in theory keep
 networks small, it can have some unintended side effects. Often when a new node is added to a network
 it takes some number of generations before the node develops any useful function and contributes to the 
-genome' fitness. If a genome with a new node is overly penalized just for having an extra node it might be
+genome's fitness. If a genome with a new node is overly penalized just for having an extra node it might be
 eliminated from the population before it has a chance to develop thus preventing what could potentially be a
-useful new development.
-
+useful new topology.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\textwidth]{images/speciation.png}
+	\caption{Aligning genomes by innovation number simplifies the counting of differing genes.}
+	\label{fig:speciation}
+\end{figure}
 NEAT solves this problem by organizing genomes into species based on how similar each genome is to each other.
 Although NEAT is not the first algorithm to speciate genomes, the tracking of innovation numbers makes
 calculating the distance between genomes trivial. Again connection genes within each genome are simply
-aligned according to their innovation numbers and the number of differing genes are counted. Then the distance
+aligned according to their innovation numbers and the number of differing genes are counted as shown in figure \ref{fig:speciation}. Then the distance
 $\delta$ between the two genomes is calculated by
 \begin{equation}
 \delta = \frac{c_1E}{N}\ + \frac{c_2D}{N}\ + c_3\overline{W}
@@ -75,18 +80,13 @@ ID in the other genome), $D$ is the number of disjoint genes, $\overline{W}$ is 
 difference between matching genes, and $c_1$, $c_2$, and $c_3$ are user-defined constants. Genomes with 
 $\delta$ smaller than some value are put into the same species and compete only within that species. If a
 species does not improve its fitness for a number of generations then it is eliminated. By protecting new
-innovations in this way, new developments are given time to develop but are eventually trimmed out if they 
+innovations in this way, new topologies are given time to develop but are eventually trimmed out if they 
 fail to produce positive results.
 
-\begin{figure}[b]
-	\centering
-	\includegraphics[width=0.5\textwidth]{images/speciation.png}
-	\caption{Aligning genomes by innovation number simplifies the counting of differing genes.}
-	\label{fig:speciation}
-\end{figure}
+
   
 \section{Experiments} \label{sec:experiments}
-Although genetic algorithms can be used to do supervised learning, often their performance lags behind
+Although genetic algorithms can be used to do supervised learning, their performance often lags behind
 more mathematically rigorous methods such as simple back-propagation. After ensuring that my implementation of NEAT worked correctly, I tested my model on several classic datasets such as the iris and diabetes datasets but I was very unimpressed by the
 results. Although the final accuracies on these problems was comparable to standard neural networks, NEAT was 
 much slower to train and very sensitive to overfit. I eventually moved on to reinforcement learning tasks
@@ -143,8 +143,8 @@ human player due to the unforgiving collision detection and narrow gaps.
 Unfortunately, Bizhawk
 can only interact with Lua scripts whereas I implemented NEAT in Python. To communicate between these
 platforms I created a server that runs NEAT in a Python environment and receives commands over a socket
-connection. The Lua client simply sends commands to the server to end a generation, get a genome's output,
-or assign a fitness score to a genome. Although this adds some undesired overhead, this setup was more than fast enough to handle all the commands necessary to run the emulator at full speed and quickly iterate
+connection. The Lua client simply sends commands to the server to perform tasks like ending a generation, getting a genome's output,
+or assigning a fitness score to a genome. Although this adds some undesired overhead, this setup was more than fast enough to handle all the commands necessary to run the emulator at full speed and quickly iterate
 through generations.
 
  In order to get any meaningful 
@@ -164,19 +164,12 @@ one of the vertical gaps. To discourage this behavior I eventually added a penal
 calculation for every flap taken. This penalty helped focus the efforts of the genomes and decreased the
 average number of generations required to 4.6.  
  
-\subsection{Pole Balancing}  \label{sec:pole}
+\subsection{Cart Pole (Pole Balacning)}  \label{sec:pole}
 Since Flappy Bird ended up being a little on the easy side, I moved on to what I hoped would be a more
 difficult reinforcement learning task. As described in \cite{cartpole}, the pole balancing problem is a classic control task
 in which systems must balance an inverted pendulum on a cart by pushing the cart left or right. The original
 formulation of the problem provides the agent with 4 observations at each time step: the position of the
 cart, the velocity of the cart, the angle of the pole, and the velocity of the tip of the pole. 
-
-At each step 
-of the simulation the agent is provided with the 4 observations and must return its chosen action, to push
-the cart left or to push the cart right. In the Python OpenAI Gym \cite{gym} the simulation ends when the
-pole angle is $> 20.2^{\circ}$ from vertical or the cart is $> 2.4$ units from the center of the track. For each
-frame the agent survives, its fitness increases by one point. The problem is considered solved when an agent
-receives $> 475$ fitness averaged over 100 runs. 
 
 \begin{figure}[h]
 	\centering
@@ -194,6 +187,13 @@ receives $> 475$ fitness averaged over 100 runs.
 	\label{fig:cartpole}
 \end{figure}
 
+At each step 
+of the simulation the agent is provided with the 4 observations and must return its chosen action, to push
+the cart left or to push the cart right. In the Python OpenAI Gym \cite{gym} the simulation ends when the
+pole angle is $> 20.2^{\circ}$ from vertical or the cart is $> 2.4$ units from the center of the track. For each
+frame the agent survives, its fitness increases by one point. The problem is considered solved when an agent
+receives $> 475$ fitness averaged over 100 runs. 
+
 Using all 4 observations, NEAT solved the problem using the initial population in $\approx80\%$ of runs, meaning
 that the system never had to change a single genome in order to achieve the required fitness. This is not
 particularly interesting so I decided to increase the challenge of the problem by only providing each network
@@ -209,7 +209,7 @@ of previous positions in order to reconstruct the velocity.
 In order to better understand the reasoning behind some design decisions in the original NEAT algorithm I made
 several modifications to the base system.
 
-\subsection{Speciation} \label{sec:speciation}
+\subsection{Dynamic Speciation Threshold} \label{sec:speciation}
 While experimenting with the NEAT algorithm I was often frustrated by how sensitive it was to the changes
 in its hyper parameters. Often it would take many runs to find parameters that allowed the system to find a
 solution and any small perturbations to these parameters would drastically influence run times. One 
@@ -237,16 +237,15 @@ it was too high then there would only be one species and the system would not ha
 While searching for how other people dealt with this problem I came across \cite{neat_web}, a website created
 by one of the original paper authors, that has some helpful information about how to improve stability in
 NEAT. One item suggested making the $\delta$ threshold dynamic in order to maintain a target number of
-species. Making this addition proved very useful. With this change I simply set the threshold to 
-a reasonable value and let the system run. Figure \ref{fig:speciation_adjustment} shows the effects of
-making this threshold dynamic. It is worth mentioning that although figure \ref{fig:no_adjust} and 
+species. Making this addition proved very useful. With this change in place I could simply set the threshold to 
+a reasonable value and let the system run without needing to repeatedly tweak the threshold to find one that led to a solution. It is worth mentioning that although figure \ref{fig:no_adjust} and 
 \ref{fig:with_adjust} look similar, this is mostly due to the fact that figure \ref{fig:no_adjust} was
 generated only after testing many threshold values to find one that allows the system to find a solution
 whereas \ref{fig:with_adjust} was generated in one shot.
  
 \subsection{Innovation Tracking} \label{sec:innovations}
 During my initial reading of \cite{neat_paper} I found it odd that innovation numbers were only shared among
-connections created during the current generation instead of among all connections in every network. It seemed to me that by always connections that connected the same nodes the same ID you could decrease the
+connections created during the current generation instead of among all connections in every network. It seemed to me that by always giving connections that connected the same nodes the same ID you could decrease the
 number of connections present in the final solution. To test this hypothesis I ran the pole balancing problem
 5 times with the default ID sharing strategy and 5 times with the IDs shared across all connections 
 regardless of generation. The results are summarized in table \ref{tab:tracking}.
@@ -277,10 +276,25 @@ nodes were present in the solution, meaning that solutions were less consistent.
 connect the same two nodes, the time at which they are introduced into the system is an important part of
 their identity. A connection between nodes A and B in generation 1 probably has a different meaning than a
 connection between the same nodes added in generation 100 as the rest of the network has changed. Forcing
-these connections to share the same ID essentially reintroduces the competing conventions problem.
+these connections to share the same ID essentially reintroduces the competing conventions problem which NEAT
+tries to avoid in the first place.
 
 \section{Conclusion} \label{sec:conclusion}
+NEAT provides several useful extensions to both the basic genetic algorithm and TWEANN algorithms. By 
+evolving networks starting from a minimal solution, NEAT frees the user from having to make any decisions 
+about the topology of the network before execution begins. In addition, because it starts from minimal networks, NEAT tends to create minimal solutions which can be desirable in many contexts. Although, like many genetic algorithms, NEAT is not as ideal as standard gradient-descent algorithms for
+normal supervised learning tasks, it excels in reinforcement learning environments.
 
+This model does suffer from a high sensitivity to choice of hyper parameters but this sensitivity can be
+somewhat lessened by making some parameters dynamic. These changes make the algorithm even easier to use as
+the user can more fully trust the algorithm not to explode.
+
+If I were to continue working with this model I would like to explore more ways to decrease the
+importance of hyper parameters and increase stability of the algorithm. I would also like to further optimize NEAT for use in
+supervised learning by experimenting with ways to reduce its tendency to overfit, possibly using dropout or
+other regularization techniques. Using the Bizhawk framework I built up I would also like to have NEAT learn to play more complicated games to push it to its limit. It would also be interesting to run NEAT
+using the output of a CNN as input so that it could potentially utilize information from raw pixel values
+rather than pulling data straight out of RAM.
 
 \medskip
 \bibliographystyle{unsrt}
