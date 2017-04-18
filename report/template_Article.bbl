@@ -21,4 +21,10 @@ Greg Brockman, Vicki Cheung, Ludwig Pettersson, Jonas Schneider, John Schulman,
   Jie Tang, and Wojciech Zaremba.
 \newblock Openai gym, 2016.
 
+\bibitem{neat_web}
+Kenneth Stanley.
+\newblock {The NeuroEvolution of Augmenting Topologies (NEAT) Users Page}.
+\newblock \url{https://www.cs.ucf.edu/~kstanley/neat.html}.
+\newblock Accessed: 2017-04-01.
+
 \end{thebibliography}
