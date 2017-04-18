@@ -10,7 +10,7 @@ local w = {0, 0}
 local s, p
 
 local SAVE_FILE = 'FB.State'
-local SAVE_DIR = 'results/flappy_penalty'
+local SAVE_DIR = 'results/flappy_no_penalty3'
 local other_port = 8080
 local my_port = 8088
 local ip = '127.0.0.1'
@@ -21,7 +21,7 @@ local NUM_GENOMES = 150
 local MAX_FITNESS = 5000000
 
 local CLEAR_BONUS = 100
-local FLAP_PENALTY = 5
+local FLAP_PENALTY = 0
 
 local function read_mem()
 	local y, h

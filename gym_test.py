@@ -1,7 +1,6 @@
 from NEAT.neatLearner import NeatLearner
 from NEAT.utils import print_hyperparameters
 
-
 import gym
 import matplotlib.pyplot as plt
 from os.path import join, exists
@@ -9,15 +8,18 @@ import pickle
 import shutil
 import time
 
-env = gym.make('CartPole-v1')
+
 SOLUTION_ITERATIONS = 100
 SOLUTION_FOUND = 475.0
 
 NUM_GENOMES = 1000
 NO_VELOCITY = True
 RENDER = False
+PLAY_BEST = False
+RECORD = False
 
-SAVE_DIR = 'results/polenovel_long_no_v2'
+SAVE_DIR = 'results/pole_with_adjust_momentum'
+BEST_DIR = 'results/pole3'
 pkl_file = join(SAVE_DIR, 'backup.pkl')
 
 def check_solution(genome):
@@ -60,6 +62,18 @@ def get_input(observation):
     else:
         return observation
 
+def play_best(n, g):
+    done = False
+    observation = g.reset()
+
+    while not done:
+        out = n.get_best_output(get_input(observation))
+        action = 0 if out < 0.5 else 1
+        observation, reward, done, info = g.step(action)
+
+    print('Done playing best')
+    exit()
+
 if __name__ == '__main__':
     start_time = time.time()
     if exists(SAVE_DIR):
@@ -71,7 +85,15 @@ if __name__ == '__main__':
             print('Exiting')
             exit()
 
-    if NO_VELOCITY:
+    env = gym.make('CartPole-v1')
+    if RECORD:
+        env = gym.wrappers.Monitor(env, join(SAVE_DIR, 'video'))
+
+    if PLAY_BEST:
+        with open(join(BEST_DIR, 'final.pkl'), 'rb') as f:
+            nl = pickle.load(f)
+        play_best(nl, env)
+    elif NO_VELOCITY:
         nl = NeatLearner(2, 1, NUM_GENOMES, True)
     else:
         nl = NeatLearner(4, 1, NUM_GENOMES, False)

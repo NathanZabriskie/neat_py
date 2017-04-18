@@ -244,6 +244,8 @@ class Genome:
             if not conn.is_enabled:
                 g1.attr('edge', style='dashed', arrowhead='empty')
             if conn.is_recurrent:
+                if not self.allow_recurrent:
+                    continue
                 g1.attr('edge', color='red')
             g1.edge(self.get_node_name(conn.from_node),
                     self.get_node_name(conn.to_node),

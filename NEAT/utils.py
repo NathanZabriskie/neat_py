@@ -4,7 +4,7 @@ import numpy as np
 
 # Hyper Parameters
 
-'''
+
 MAX_STALENESS = 20
 
 MUTATE_POWER = 2.0
@@ -20,6 +20,9 @@ REENABLE_CHANCE = 0.2
 DISABLE_CHANCE = 0.1
 
 DeltaDist = 3.0
+SPECIES_TARGET = 10
+DELTA_ADJUSTER = 0.05
+MIN_DISTANCE = 0.3
 C1 = 1.0
 C2 = 1.0
 C3 = 0.4
@@ -39,15 +42,17 @@ CONN_PERTURB_CHANCE = 0.9
 REENABLE_CHANCE = 0.2
 DISABLE_CHANCE = 0.1
 
-DeltaDist = 20.0
-SPECIES_TARGET = 100
+DeltaDist = 15.0
+SPECIES_TARGET = 40
 DELTA_ADJUSTER = 0.3
+CUR_ADJUSTMENT = DELTA_ADJUSTER
+LAST_ABOVE = False
 MIN_DISTANCE = 0.3
 
 C1 = 1.5
 C2 = 1.5
 C3 = 1.0
-
+'''
 
 def unison_shuffle(a, b):
     assert len(a) == len(b)
@@ -121,7 +126,6 @@ def _avg_diff(gen1, gen2):
 
     return diff / num_shared
 
-
 def print_hyperparameters():
     lines = []
     lines.append('Hyperparameters:')
@@ -135,6 +139,9 @@ def print_hyperparameters():
     lines.append('REENABLE_CHANCE: {}'.format(REENABLE_CHANCE))
     lines.append('DISABLE_CHANCE: {}'.format(DISABLE_CHANCE))
     lines.append('DeltaDist: {}'.format(DeltaDist))
+    lines.append('SPECIES_TARGET: {}'.format(SPECIES_TARGET))
+    lines.append('DELTA_ADJUSTER: {}'.format(DELTA_ADJUSTER))
+    lines.append('MIN_DISTANCE: {}'.format(MIN_DISTANCE))
     lines.append('C1: {}'.format(C1))
     lines.append('C2: {}'.format(C2))
     lines.append('C3: {}'.format(C3))

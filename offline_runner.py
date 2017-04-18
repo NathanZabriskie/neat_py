@@ -11,11 +11,11 @@ import shutil
 import tqdm
 
 
-GENERATIONS = 200
-GENOMES = 200
+GENERATIONS = 50
+GENOMES = 150
 
-SAVE_DIR = 'results/ionosphere_long'
-DATASET = 'data/ionosphere.arff'
+SAVE_DIR = 'results/iris_new1'
+DATASET = 'data/iris.arff'
 
 def XOR():
     inputs = np.array([[0.0,0.0],

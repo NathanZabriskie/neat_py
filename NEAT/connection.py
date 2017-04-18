@@ -12,8 +12,7 @@ class Connection:
     next_id = 0
     def __init__(self, from_node, to_node, ID=-1, is_recurrent=False):
         if ID == -1:
-            self.ID = next_id
-            next_id += 1
+            self.ID = get_next_connection_id()
         else:
             self.ID = ID
 

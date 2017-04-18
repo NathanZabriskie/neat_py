@@ -23,18 +23,22 @@ class NeatLearner:
 
         self.species = []
         self.graveyard = []
-
+        self.connections = []
         self.generations = 0
 
         self.best_genome = None
 
         self._init_genomes()
-        Connection.next_id = self.num_inputs + self.num_outputs - 1
+
 
     def _init_genomes(self):
         print('Initializing ' + str(self.num_genomes) + ' genomes.')
         for i in range(self.num_genomes):
             self.genomes.append(Genome(self.num_inputs, self.num_outputs, self.allow_recurrent))
+
+        for i in range(self.num_inputs):
+            for o in range(self.num_outputs):
+                self.connections.append(Connection(i,o+self.num_inputs))
 
     def start_generation(self):
         for gen in self.genomes:
@@ -43,7 +47,7 @@ class NeatLearner:
     def adjust_species(self):
         if self.generations <= 1:
             return
-        global DeltaDist
+        global DeltaDist, LAST_ABOVE, CUR_ADJUSTMENT
         if len(self.species) < SPECIES_TARGET:
             DeltaDist -= DELTA_ADJUSTER
         elif len(self.species) > SPECIES_TARGET:
@@ -60,8 +64,7 @@ class NeatLearner:
         self._remove_stale_species()
         total_fitness = self._calc_total_fitness()
         new_genomes = []
-
-        added_connections = []
+        self.connections = []
         survived_species = []
         for spec in self.species:
             num_children = math.floor((spec.adj_fitness/total_fitness)
@@ -69,17 +72,19 @@ class NeatLearner:
             if num_children != 0:
                 survived_species.append(spec)
                 new_genomes += spec.make_children(num_children,
-                                                  added_connections,
+                                                  self.connections,
                                                   self.num_genomes)
             else:
                 print('No kids :(')
 
         self.species = survived_species
-        while len(new_genomes) < self.num_genomes:
+        num_children = len(new_genomes)
+        while num_children < self.num_genomes:
             spec = random.choice(self.species)
             new_genomes += spec.make_children(1,
-                                              added_connections,
+                                              self.connections,
                                               self.num_genomes)
+            num_children = len(new_genomes)
 
         self.genomes = new_genomes
 

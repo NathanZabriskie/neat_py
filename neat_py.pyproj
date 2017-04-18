@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{a2739cb2-5b03-4413-a076-41494e35bb47}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>remote_runner.py</StartupFile>
+    <StartupFile>offline_runner.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>

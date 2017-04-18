@@ -1,0 +1,24 @@
+\begin{thebibliography}{1}
+
+\bibitem{neat_paper}
+Kenneth Stanley and Ristro Miikkulainen.
+\newblock {Evolving} {Neural} {Networks} through {Augmenting} {Topologies}.
+\newblock {\em Evolutionary Computation}, 10(2):99--127, 2002.
+
+\bibitem{whitley}
+Darrell Whitley, Stephen Dominic, Rajarshi Das, and Charles~W Anderson.
+\newblock {Genetic Reinforcement Learning for Neurocontrol Problems}.
+\newblock In {\em Genetic Algorithms for Machine Learning}, pages 103--128.
+  Springer, 1993.
+
+\bibitem{cartpole}
+Charles~W Anderson.
+\newblock {Learning to Control an Inverted Pendulum Using Neural Networks}.
+\newblock {\em IEEE Control Systems Magazine}, 9(3):31--37, 1989.
+
+\bibitem{gym}
+Greg Brockman, Vicki Cheung, Ludwig Pettersson, Jonas Schneider, John Schulman,
+  Jie Tang, and Wojciech Zaremba.
+\newblock Openai gym, 2016.
+
+\end{thebibliography}
