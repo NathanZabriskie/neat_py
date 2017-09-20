@@ -90,7 +90,7 @@ Although genetic algorithms can be used to do supervised learning, their perform
 more mathematically rigorous methods such as simple back-propagation. After ensuring that my implementation of NEAT worked correctly, I tested my model on several classic datasets such as the iris and diabetes datasets but I was very unimpressed by the
 results. Although the final accuracies on these problems was comparable to standard neural networks, NEAT was 
 much slower to train and very sensitive to overfit. I eventually moved on to reinforcement learning tasks
-because as detailed in \cite{whitley} genetic algorithms excel in situations where gradients are difficult to
+because as detailed in \cite{whitley}, genetic algorithms excel in situations where gradients are difficult to
 calculate and standard gradient-descent algorithms break down. As the reinforcement learning tasks better
 showcase the strengths of this model this section will primarily deal with those experiments. NOTE: In all
 network diagrams green nodes are inputs, blue nodes are outputs, black edges represent forward connections,
@@ -100,7 +100,7 @@ effect.
 \subsection{XOR Verification} \label{sec:xor}
 I used the XOR task to ensure that my NEAT implementation worked properly as Stanley and 
 Miikkulainen explicitly mention it in their paper as a good test problem. For this experiment I 
-initialized a population of 150 genomes to each have 2 input nodes and 1 output node. Each genome received
+initialized a population of 150 genomes with 2 input nodes and 1 output node. Each genome received
 a fitness calculated by the formula 
 \begin{equation}
 fitness = (4-\sum_{n} \left|t_n-z_n\right|)^2 
