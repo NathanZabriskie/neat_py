@@ -1,7 +1,6 @@
 from .utils import MUTATE_POWER
 import random
 
-
 def get_next_connection_id():
     next_id = Connection.next_id
     Connection.next_id += 1

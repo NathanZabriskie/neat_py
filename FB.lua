@@ -1,5 +1,5 @@
 local socket = require("socket")
-local JSON = (loadfile "JSON.lua")()
+local JSON = (loadfile "third-party/JSON.lua")()
 
 local sRAM=0x0037 -- game glitches around 680, 1360, 2048, 2731, 3414, 4096, 4780, 5460, 6xxx, 6826, 7502
 local yRAM=0x003F
