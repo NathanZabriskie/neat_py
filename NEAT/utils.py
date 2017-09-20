@@ -1,10 +1,7 @@
 import math
 import numpy as np
 
-
 # Hyper Parameters
-
-
 MAX_STALENESS = 20
 
 MUTATE_POWER = 2.0

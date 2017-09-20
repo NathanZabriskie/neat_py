@@ -18,8 +18,8 @@ RENDER = False
 PLAY_BEST = False
 RECORD = False
 
-SAVE_DIR = 'results/pole_with_adjust_momentum'
-BEST_DIR = 'results/pole3'
+SAVE_DIR = 'results/new_pole'
+BEST_DIR = 'results/new_pole3'
 pkl_file = join(SAVE_DIR, 'backup.pkl')
 
 def check_solution(genome):
